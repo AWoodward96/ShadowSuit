@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-
+//adds shadows to the object
 [RequireComponent(typeof(SpriteRenderer))]
 
 public class ShadowsPlease : MonoBehaviour
