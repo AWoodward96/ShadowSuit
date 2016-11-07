@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour {
     public GameObject SpotLight;
     private SpriteRenderer spriteRend;
 
+    public bool lightDebug;
+    public float speed;
+
 	// Use this for initialization
 	void Start () {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
@@ -15,12 +18,17 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(isLitSpot(SpotLight))
-            spriteRend.color = Color.blue;  // if in a point light, turns blue
-        else if(isLitPoint(PointLight))
-            spriteRend.color = Color.red;   // if in a spot light, turns red
-        else
-            spriteRend.color = Color.white; // if in neither, turns white
+        if (lightDebug)
+        {
+            if (isLitSpot(SpotLight))
+                spriteRend.color = Color.blue;  // if in a point light, turns blue
+            else if (isLitPoint(PointLight))
+                spriteRend.color = Color.red;   // if in a spot light, turns red
+            else
+                spriteRend.color = Color.white; // if in neither, turns white
+        }
+
+        processInput();
 	}
 
     bool isLitSpot(GameObject lite) // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a spot light)
@@ -54,5 +62,25 @@ public class PlayerController : MonoBehaviour {
             return true;
         else
             return false;
+    }
+
+    void processInput()
+    {
+        if (Input.GetKey(KeyCode.W))
+        {
+            transform.Translate(Vector3.forward * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            transform.Translate(Vector3.left * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            transform.Translate(Vector3.back * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            transform.Translate(Vector3.right * Time.deltaTime * speed);
+        }
     }
 }
