@@ -49,12 +49,14 @@ public class PlayerController : MonoBehaviour {
         float arc = lt.spotAngle;   // gets the spot angle of the light
         float angle = Vector3.Angle(lightForward, lightToPlayer);   // gets the angle between the forward vector and the vector to the player
 
+
         RaycastHit hit;
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc/2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
         {
             Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
             lt.color = Color.red;
+            GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
         }
         else
@@ -62,6 +64,7 @@ public class PlayerController : MonoBehaviour {
             lt.color = Color.white;
             return false;
         }
+
     }
 
     bool isLitPoint(GameObject lite)    // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a point light)
@@ -72,12 +75,14 @@ public class PlayerController : MonoBehaviour {
         lightToPlayer.y = 0;    // flattens the forward vector on the y axis
         lightFlattened.y = 0;   // flattens the vector to the player on the y axis
 
+
         RaycastHit hit;
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
         {
             Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
             lt.color = Color.red;
+            GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
         }
         else
@@ -85,6 +90,7 @@ public class PlayerController : MonoBehaviour {
             lt.color = Color.white;
             return false;
         }
+
     }
 
     void processInput()

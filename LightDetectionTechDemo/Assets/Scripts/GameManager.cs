@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
 
     public void PlayerInLight() //run this function if the player is lit up
     {
+        Debug.Log("IN LIGHT");
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
         GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
