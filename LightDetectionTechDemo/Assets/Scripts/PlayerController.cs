@@ -10,10 +10,12 @@ public class PlayerController : MonoBehaviour {
     public bool lightDebug;
     public float speed;
 
+    CharacterController myCC;
+
 	// Use this for initialization
 	void Start () {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
-	
+        myCC = GetComponent<CharacterController>();
 	}
 	
 	// Update is called once per frame
@@ -97,19 +99,20 @@ public class PlayerController : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.W))
         {
-            transform.Translate(Vector3.forward * Time.deltaTime * speed);
+            
+           myCC.Move(Vector3.forward * Time.deltaTime * speed);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            transform.Translate(Vector3.left * Time.deltaTime * speed);
+            myCC.Move(Vector3.left * Time.deltaTime * speed);
         }
         if (Input.GetKey(KeyCode.S))
         {
-            transform.Translate(Vector3.back * Time.deltaTime * speed);
+            myCC.Move(Vector3.back * Time.deltaTime * speed);
         }
         if (Input.GetKey(KeyCode.D))
         {
-            transform.Translate(Vector3.right * Time.deltaTime * speed);
+            myCC.Move(Vector3.right * Time.deltaTime * speed);
         }
     }
 }
