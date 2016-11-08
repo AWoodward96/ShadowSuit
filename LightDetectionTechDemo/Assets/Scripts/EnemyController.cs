@@ -11,10 +11,12 @@ public class EnemyController : MonoBehaviour
     int chaseSpeed = 5; //speed for chasing the player
     public bool guarding = true; //a bool saying whether the enemy is pathing or chasing (true is pathing)
     public Vector2 target; //the enemies target, to be set to the player's x and z position
+    Rigidbody rb;
 
     // Use this for initialization
     void Start ()
     {
+        rb = GetComponent<Rigidbody>();
         startingPos = new Vector2(transform.position.x, transform.position.z); //set the starting position
         for(int i = 0; i < pathFollowing2.Count; i++) //converts the list to a queue
         {
@@ -27,20 +29,22 @@ public class EnemyController : MonoBehaviour
     { 
         if (guarding) //for pathing
         {
-            float velocity = guardSpeed * Time.deltaTime; //distance traveled this frame
+            float velocity = guardSpeed;// * Time.deltaTime; //distance traveled this frame
             Vector2 direction = (pathFollowing.Peek() - new Vector2(transform.position.x, transform.position.z)).normalized; //direction moved in this frame
-            if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), pathFollowing.Peek()) < velocity) //check if the enemy is close to the next point
+            if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), pathFollowing.Peek()) < velocity * Time.deltaTime) //check if the enemy is close to the next point
             {
                 nextPath(); //move to the next part of the path if it is
             }
             else
             {
-                transform.position = new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)); //if not, move the enemy closer to its path point
+                //transform.position = new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)); //if not, move the enemy closer to its path point
+                //rb.MovePosition(new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)));
+                rb.velocity = new Vector3((velocity * direction.x), 0, (velocity * direction.y));
             }
         }
         else if (target != null) //for chasing (if target is null, the enemy freezes)
         {
-            float velocity = chaseSpeed * Time.deltaTime; //distance traveled this frame
+            float velocity = chaseSpeed;// * Time.deltaTime; //distance traveled this frame
             Vector2 direction = (target - new Vector2(transform.position.x, transform.position.z)).normalized; //direction moved in this frame
             if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), target) < 1) //check if the enemy is close to it's target, currently assumed to be the player's position
             {
@@ -48,7 +52,9 @@ public class EnemyController : MonoBehaviour
             }
             else
             {
-                transform.position = new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)); //if not, move the enemy closer to it's target
+                //transform.position = new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)); //if not, move the enemy closer to it's target
+                //rb.MovePosition(new Vector3(transform.position.x + (velocity * direction.x), transform.position.y, transform.position.z + (velocity * direction.y)));
+                rb.velocity = new Vector3((velocity * direction.x), 0, (velocity * direction.y));
             }
         }
     }
@@ -61,6 +67,7 @@ public class EnemyController : MonoBehaviour
 
     public void resetPath()
     {
+        pathFollowing = new Queue<Vector2>(); //resets the queue path
         for (int i = 0; i < pathFollowing2.Count; i++) //converts the list to a queue
         {
             pathFollowing.Enqueue(pathFollowing2[i]);
