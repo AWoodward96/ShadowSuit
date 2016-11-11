@@ -12,7 +12,16 @@ public class GameManager : MonoBehaviour
 	void Start ()
     {
         instance = this;
-	}
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
+        for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
+        {
+            for (int i2 = 0; i2 < enemies.Length; i2++) //loops through all the enemies
+            {
+                Physics.IgnoreCollision(enemies[i].GetComponent<Collider>(), enemies[i2].GetComponent<Collider>());
+            }
+        }
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -21,9 +30,22 @@ public class GameManager : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
-            if(!enemies[i].GetComponent<EnemyController>().guarding) //if this enemy is chasing the player...
+            if(!enemies[i].GetComponent<EnemyController>().guarding) //if this enemy is chasing the player, check it's target position. If it can see the player, chase them. If not, go to the players last seen position
             {
-                enemies[i].GetComponent<EnemyController>().target = player.transform; //...update it's target position
+                //the result of the raycast check
+                RaycastHit hit;
+                //the distance between the player and enemy, for raycasting
+                Vector3 dist = player.transform.position - enemies[i].transform.position;
+
+                //checks to see if the enemy can see the player(if a raycast between them results in colliding with the player's collider)
+                if (Physics.Raycast(enemies[i].transform.position, dist, out hit) && hit.collider != player.GetComponent<Collider>())
+                {
+                }
+                //only chase the player if the enemy can see them
+                else
+                {
+                    enemies[i].GetComponent<EnemyController>().target = player.transform.position; //...update it's target position
+                }
             }
         }
     }
@@ -35,8 +57,21 @@ public class GameManager : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
-            enemies[i].GetComponent<EnemyController>().guarding = false; //sets this enemy to chase the player
-            enemies[i].GetComponent<EnemyController>().target = player.transform; //sets the enemies target to the player's position
+            //the result of the raycast check
+            RaycastHit hit;
+            //the distance between the player and enemy, for raycasting
+            Vector3 dist = player.transform.position - enemies[i].transform.position;
+
+            //checks to see if the enemy can see the player(if a raycast between them results in colliding with the player's collider)
+            if (Physics.Raycast(enemies[i].transform.position, dist, out hit) && hit.collider != player.GetComponent<Collider>())
+            {
+            }
+            //only chase the player if the enemy can see them
+            else
+            {
+                enemies[i].GetComponent<EnemyController>().guarding = false; //sets this enemy to chase the player
+                enemies[i].GetComponent<EnemyController>().target = player.transform.position; //sets the enemies target to the player's position
+            }
         }
     }
 

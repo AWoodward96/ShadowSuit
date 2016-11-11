@@ -10,7 +10,7 @@ public class EnemyController : MonoBehaviour
     int guardSpeed = 3; //speed for pathing
     int chaseSpeed = 5; //speed for chasing the player
     public bool guarding = true; //a bool saying whether the enemy is pathing or chasing (true is pathing)
-    public Transform target; //the enemies target, to be set to the player's x and z position
+    public Vector3 target; //the enemies target, to be set to the player's x and z position
     CharacterController myCC;
 
     Vector3[] path;
@@ -59,7 +59,7 @@ public class EnemyController : MonoBehaviour
         }
         else if (target != null) //for chasing (if target is null, the enemy freezes)
         {
-            Vector3 y0Target = returnYZeroVector3(target.position);
+            Vector3 y0Target = returnYZeroVector3(target);
             Vector3 y0Transform = returnYZeroVector3(transform.position);
 
             // First thing to do is to make sure you're far enough away from the player that you need to move closer to him
@@ -89,19 +89,31 @@ public class EnemyController : MonoBehaviour
                 //Debug.Log("A Star");
                 pathRequested = true;
                 pathIndex = 0;
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
             }
         }
 
-        Velocity += Vector3.down;
-        myCC.Move(Velocity * Time.deltaTime);
-        Velocity *= 0;
+        //makes sure enemies stay on the ground (no floating off elevated parts)
+        Velocity += Vector3.down * 5;
+
+        //enemy stops chasing and begins guarding if it is close to it's target
+        //right now, enemy and player collide at about .9 away so checking any further will make the enemy leave before killing the player
+        if ((transform.position - target).magnitude < .35)
+        {
+            target = Vector3.zero;
+            guarding = true;
+            SetClosestPath();
+        }
+        else
+        {
+            myCC.Move(Velocity * Time.deltaTime);
+            Velocity *= 0;
+        }
     }
 
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
-
         if (pathSuccessful)
         {
             path = newPath;
@@ -114,8 +126,6 @@ public class EnemyController : MonoBehaviour
             Debug.Log("Path Finding failed for: " + this.gameObject.name);
         }
     }
-
-
 
     IEnumerator FollowPath()
     {
@@ -161,7 +171,33 @@ public class EnemyController : MonoBehaviour
         {
             pathFollowing.Enqueue(returnYZeroVector3(pathFollowing2[i].transform.position));
         }
+    }
+    //sets the queue to start at the closest point, while keeping the same order
+    public void SetClosestPath()
+    {
+        int i = 0;
+        float closest = -1;
+        //loops through all points of the queue, finding the closest one
+        while (i < pathFollowing.Count)
+        {
+            i++;
+            Vector3 path = pathFollowing.Dequeue(); //pops off the first element of the path...
+            pathFollowing.Enqueue(path); //...and adds it to the end of the path
+            float dist = (path - transform.position).magnitude;
+            if (closest == -1 || dist < closest)
+            {
+                closest = dist;
+            }
+        }
+        //loops through the queue again, stopping when the closest point is the first point
+        float distance = (pathFollowing.Peek() - transform.position).magnitude;
+        while (distance != closest)
+        {
+            Vector3 path = pathFollowing.Dequeue(); //pops off the first element of the path...
+            pathFollowing.Enqueue(path); //...and adds it to the end of the path
 
+            distance = (pathFollowing.Peek() - transform.position).magnitude;
+        }
     }
 
     Vector3 returnYZeroVector3(Vector3 v)

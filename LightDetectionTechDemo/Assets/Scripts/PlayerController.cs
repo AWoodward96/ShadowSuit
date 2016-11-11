@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour {
     public bool lightDebug;
     public float speed;
 
+    public Light brightnessAdjuster;
+
     CharacterController myCC;
     Vector3 Velocity;
 
@@ -114,7 +116,16 @@ public class PlayerController : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.D))
         {
-            Velocity += (Vector3.right * Time.deltaTime * speed); 
+            Velocity += (Vector3.right * Time.deltaTime * speed);
+        }
+        //a brightness adjuster, for unnecessarily dark computers
+        if (Input.GetKey(KeyCode.R))
+        {
+            brightnessAdjuster.intensity += .01f;
+        }
+        if (Input.GetKey(KeyCode.F))
+        {
+            brightnessAdjuster.intensity -= .01f;
         }
 
         Velocity += Vector3.down;
