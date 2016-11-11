@@ -159,8 +159,9 @@ public class EnemyController : MonoBehaviour
         pathFollowing = new Queue<Vector3>(); //resets the queue path
         for (int i = 0; i < pathFollowing2.Count; i++) //converts the list to a queue
         {
-            pathFollowing.Enqueue(pathFollowing2[i].transform.position);
+            pathFollowing.Enqueue(returnYZeroVector3(pathFollowing2[i].transform.position));
         }
+
     }
 
     Vector3 returnYZeroVector3(Vector3 v)
