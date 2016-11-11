@@ -4,11 +4,14 @@ using System.Collections;
 public class GameManager : MonoBehaviour
 {
 
+    static GameManager instance;
+
+    static Vector3 playerStartingPosition;
 
 	// Use this for initialization
 	void Start ()
     {
-	
+        instance = this;
 	}
 	
 	// Update is called once per frame
@@ -20,24 +23,24 @@ public class GameManager : MonoBehaviour
         {
             if(!enemies[i].GetComponent<EnemyController>().guarding) //if this enemy is chasing the player...
             {
-                enemies[i].GetComponent<EnemyController>().target = new Vector2(player.transform.position.x, player.transform.position.z); //...update it's target position
+                enemies[i].GetComponent<EnemyController>().target = player.transform; //...update it's target position
             }
         }
     }
 
     public void PlayerInLight() //run this function if the player is lit up
     {
-        Debug.Log("IN LIGHT");
+        //Debug.Log("IN LIGHT");
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
         GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
             enemies[i].GetComponent<EnemyController>().guarding = false; //sets this enemy to chase the player
-            enemies[i].GetComponent<EnemyController>().target = new Vector2(player.transform.position.x, player.transform.position.z); //sets the enemies target to the player's position
+            enemies[i].GetComponent<EnemyController>().target = player.transform; //sets the enemies target to the player's position
         }
     }
 
-    public void Restart() //resets the level to it's original state
+    public static void Restart() //resets the level to it's original state
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
@@ -47,6 +50,11 @@ public class GameManager : MonoBehaviour
             enemies[i].GetComponent<EnemyController>().resetPath(); //makes sure this enemies path is followed in the right order
         }
         GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
-        player.transform.position = new Vector3(-8.5f, player.transform.position.y, -8); //sets the player to it's starting position
+        player.transform.position =playerStartingPosition; //sets the player to it's starting position
+    }
+
+    public static void InitializePlayer( Vector3 startingPosition)
+    {
+        playerStartingPosition = startingPosition;
     }
 }

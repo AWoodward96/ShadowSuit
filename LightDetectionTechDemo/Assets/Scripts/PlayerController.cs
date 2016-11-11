@@ -11,11 +11,14 @@ public class PlayerController : MonoBehaviour {
     public float speed;
 
     CharacterController myCC;
+    Vector3 Velocity;
 
 	// Use this for initialization
 	void Start () {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
         myCC = GetComponent<CharacterController>();
+
+        GameManager.InitializePlayer(transform.position);
 	}
 	
 	// Update is called once per frame
@@ -99,20 +102,24 @@ public class PlayerController : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.W))
         {
-            
-           myCC.Move(Vector3.forward * Time.deltaTime * speed);
+            Velocity += (Vector3.forward * Time.deltaTime * speed);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            myCC.Move(Vector3.left * Time.deltaTime * speed);
+            Velocity += (Vector3.left * Time.deltaTime * speed); 
         }
         if (Input.GetKey(KeyCode.S))
         {
-            myCC.Move(Vector3.back * Time.deltaTime * speed);
+            Velocity += (Vector3.back * Time.deltaTime * speed); 
         }
         if (Input.GetKey(KeyCode.D))
         {
-            myCC.Move(Vector3.right * Time.deltaTime * speed);
+            Velocity += (Vector3.right * Time.deltaTime * speed); 
         }
+
+        Velocity += Vector3.down;
+
+        myCC.Move(Velocity);
+        Velocity *= .8f;
     }
 }
