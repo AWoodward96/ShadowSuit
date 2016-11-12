@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -88,8 +89,36 @@ public class GameManager : MonoBehaviour
         player.transform.position =playerStartingPosition; //sets the player to it's starting position
     }
 
-    public static void InitializePlayer( Vector3 startingPosition)
+
+    public static void InitializePlayer(Vector3 startingPosition, PlayerController pc)
     {
+        // Set up the player reset poisition
         playerStartingPosition = startingPosition;
+
+        // Get a list of all objects with the layer mask 'Light'
+        GameObject[] Arr = FindObjectsOfType<GameObject>();
+        List<GameObject> Lights = new List<GameObject>();
+        int mask = LayerMask.NameToLayer("Light");
+
+        Light tester;
+
+        foreach(GameObject obj in Arr)
+        {
+            // Check to see if it's in the layer mask
+            if(obj.layer == mask)
+            {
+                // Ensure there's actually a light on it
+                tester = obj.GetComponent<Light>();
+                if(tester)
+                {
+                    // Add the light
+                    Lights.Add(obj);
+                }
+
+                tester = null;
+            }
+        }
+
+        pc.initializeLights(Lights);
     }
 }

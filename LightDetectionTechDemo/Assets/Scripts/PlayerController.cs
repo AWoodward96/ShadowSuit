@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour {
 
-    public GameObject[] pointLights;
-    public GameObject[] spotLights;
+    public List<GameObject> pointLights;
+    public List<GameObject> spotLights;
     private SpriteRenderer spriteRend;
 
     public bool lightDebug;
@@ -20,7 +21,8 @@ public class PlayerController : MonoBehaviour {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
         myCC = GetComponent<CharacterController>();
 
-        GameManager.InitializePlayer(transform.position);
+        GameManager.InitializePlayer(transform.position, this);
+      
 	}
 	
 	// Update is called once per frame
@@ -119,11 +121,11 @@ public class PlayerController : MonoBehaviour {
             Velocity += (Vector3.right * Time.deltaTime * speed);
         }
         //a brightness adjuster, for unnecessarily dark computers
-        if (Input.GetKey(KeyCode.R))
+        if (Input.GetKey(KeyCode.R) && brightnessAdjuster)
         {
             brightnessAdjuster.intensity += .01f;
         }
-        if (Input.GetKey(KeyCode.F))
+        if (Input.GetKey(KeyCode.F) && brightnessAdjuster)
         {
             brightnessAdjuster.intensity -= .01f;
         }
@@ -132,5 +134,22 @@ public class PlayerController : MonoBehaviour {
 
         myCC.Move(Velocity);
         Velocity *= .8f;
+    }
+
+    public void initializeLights(List<GameObject> listOfLights)
+    {
+        foreach(GameObject obj in listOfLights)
+        {
+            Light objectLight = obj.GetComponent<Light>();
+            if(objectLight.type == LightType.Spot)
+            {
+                spotLights.Add(obj);
+            }
+
+            if(objectLight.type == LightType.Point)
+            {
+                pointLights.Add(obj);
+            }
+        }
     }
 }
