@@ -122,7 +122,7 @@ public class EnemyController : MonoBehaviour
         else
         {
             pathRequested = false;
-            Debug.Log("Path Finding failed for: " + this.gameObject.name);
+            //Debug.Log("Path Finding failed for: " + this.gameObject.name);
         }
     }
 

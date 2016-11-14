@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour {
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc/2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
         {
-            Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
+            //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
             lt.color = Color.red;
             GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
@@ -95,7 +95,7 @@ public class PlayerController : MonoBehaviour {
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
         {
-            Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
+            //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
             lt.color = Color.red;
             GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
@@ -134,6 +134,10 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKey(KeyCode.F) && brightnessAdjuster)
         {
             brightnessAdjuster.intensity -= .01f;
+        }
+        if (Input.GetKey(KeyCode.Space))
+        {
+            GameManager.Restart();
         }
 
         Velocity += Vector3.down;
