@@ -44,7 +44,6 @@ public class EnemyController : MonoBehaviour
         {
             Vector3 distanceVector = pathFollowing.Peek() - transform.position;
             Vector3 yZeroDistanceVector = returnYZeroVector3(distanceVector);
-            float dist = Vector3.Distance(returnYZeroVector3(transform.position), pathFollowing.Peek());
 
 
             if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), pathFollowing.Peek()) < .1f)
@@ -70,7 +69,7 @@ public class EnemyController : MonoBehaviour
             bool safe = !Physics.Raycast(y0Transform, y0Target - y0Transform, out hit, toPlayerDist, UnwalkableMask);
             if (safe)
             {
-                Debug.Log("Simple");
+                //Debug.Log("Simple");
 
                 // First thing is to stop the a Star algorythm
                 StopCoroutine("FollowPath");
@@ -207,7 +206,7 @@ public class EnemyController : MonoBehaviour
 
     void OnControllerColliderHit(ControllerColliderHit col)
     {
-        if (col.transform.tag == "Player")
+        if (col.transform.tag == "GamePlayer")
         {
             GameManager.Restart();
         }

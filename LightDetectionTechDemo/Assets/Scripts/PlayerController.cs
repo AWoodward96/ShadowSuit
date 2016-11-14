@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour {
     public List<GameObject> spotLights;
     private SpriteRenderer spriteRend;
 
+    bool inLight;
+
     public bool lightDebug;
     public float speed;
 
@@ -22,16 +24,19 @@ public class PlayerController : MonoBehaviour {
         myCC = GetComponent<CharacterController>();
 
         GameManager.InitializePlayer(transform.position, this);
-      
+
+        inLight = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        inLight = false;
         foreach (GameObject spotLight in spotLights)
         {
             if (isLitSpot(spotLight))
             {
                 spriteRend.color = Color.blue;
+                inLight = true;
                 break;
             }
         }
@@ -40,6 +45,7 @@ public class PlayerController : MonoBehaviour {
             if (isLitPoint(pointLight))
             {
                 spriteRend.color = Color.red;
+                inLight = true;
                 break;
             }
         }
@@ -150,6 +156,14 @@ public class PlayerController : MonoBehaviour {
             {
                 pointLights.Add(obj);
             }
+        }
+    }
+
+    public bool InLight
+    {
+        get
+        {
+            return inLight;
         }
     }
 }

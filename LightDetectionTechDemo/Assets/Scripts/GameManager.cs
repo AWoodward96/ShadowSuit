@@ -4,15 +4,14 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-
-    static GameManager instance;
+    //static GameManager instance;
 
     static Vector3 playerStartingPosition;
 
 	// Use this for initialization
 	void Start ()
     {
-        instance = this;
+        //instance = this;
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
@@ -28,7 +27,7 @@ public class GameManager : MonoBehaviour
 	void Update ()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
-        GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
+        GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
             if(!enemies[i].GetComponent<EnemyController>().guarding) //if this enemy is chasing the player, check it's target position. If it can see the player, chase them. If not, go to the players last seen position
@@ -55,7 +54,7 @@ public class GameManager : MonoBehaviour
     {
         //Debug.Log("IN LIGHT");
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
-        GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
+        GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
             //the result of the raycast check
@@ -74,6 +73,24 @@ public class GameManager : MonoBehaviour
                 enemies[i].GetComponent<EnemyController>().target = player.transform.position; //sets the enemies target to the player's position
             }
         }
+        GameObject[] cameras = GameObject.FindGameObjectsWithTag("WallCamera"); //gets all tagged wall cameras
+        for (int i = 0; i < cameras.Length; i++) //loops through all the cameras
+        {
+            //check if the camera can see the player
+            if(cameras[i].GetComponent<WallCameras>().CanSee(player))
+            {
+                for (int i2 = 0; i2 < enemies.Length; i2++) //loops through all the enemies
+                {
+                    //only change enemies that don't presently know where the player is
+                    if (enemies[i2].GetComponent<EnemyController>().guarding)
+                    {
+                        //enemies go to where the player was last seen
+                        enemies[i2].GetComponent<EnemyController>().guarding = false;
+                        enemies[i2].GetComponent<EnemyController>().target = player.transform.position;
+                    }
+                }
+            }
+        }
     }
 
     public static void Restart() //resets the level to it's original state
@@ -85,7 +102,7 @@ public class GameManager : MonoBehaviour
             enemies[i].GetComponent<EnemyController>().guarding = true; //sets this enemy to follow it's path
             enemies[i].GetComponent<EnemyController>().resetPath(); //makes sure this enemies path is followed in the right order
         }
-        GameObject player = GameObject.FindGameObjectWithTag("Player"); //gets the tagged player
+        GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
         player.transform.position =playerStartingPosition; //sets the player to it's starting position
     }
 
