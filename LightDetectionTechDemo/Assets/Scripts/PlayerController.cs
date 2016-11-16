@@ -11,9 +11,12 @@ public class PlayerController : MonoBehaviour {
     bool inLight;
 
     public bool lightDebug;
+    public float sprintSpeed;
     public float speed;
 
     public Light brightnessAdjuster;
+
+    public GameObject lightIndicator;
 
     CharacterController myCC;
     Vector3 Velocity;
@@ -30,12 +33,14 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        lightIndicator.SetActive(false);
         inLight = false;
         foreach (GameObject spotLight in spotLights)
         {
             if (isLitSpot(spotLight))
             {
-                spriteRend.color = Color.blue;
+                lightIndicator.SetActive(true);
+                //spriteRend.color = Color.blue;
                 inLight = true;
                 break;
             }
@@ -44,7 +49,8 @@ public class PlayerController : MonoBehaviour {
         {
             if (isLitPoint(pointLight))
             {
-                spriteRend.color = Color.red;
+                lightIndicator.SetActive(true);
+                //spriteRend.color = Color.red;
                 inLight = true;
                 break;
             }
@@ -70,7 +76,7 @@ public class PlayerController : MonoBehaviour {
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc/2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
         {
             //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
-            lt.color = Color.red;
+            //lt.color = Color.red;
             GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
         }
@@ -96,7 +102,7 @@ public class PlayerController : MonoBehaviour {
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
         {
             //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
-            lt.color = Color.red;
+           // lt.color = Color.red;
             GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
             return true;
         }
@@ -110,21 +116,26 @@ public class PlayerController : MonoBehaviour {
 
     void processInput()
     {
+        float usedSpeed = speed;
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            usedSpeed = sprintSpeed;
+        }
         if (Input.GetKey(KeyCode.W))
         {
-            Velocity += (Vector3.forward * Time.deltaTime * speed);
+            Velocity += (Vector3.forward * Time.deltaTime * usedSpeed);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            Velocity += (Vector3.left * Time.deltaTime * speed); 
+            Velocity += (Vector3.left * Time.deltaTime * usedSpeed); 
         }
         if (Input.GetKey(KeyCode.S))
         {
-            Velocity += (Vector3.back * Time.deltaTime * speed); 
+            Velocity += (Vector3.back * Time.deltaTime * usedSpeed); 
         }
         if (Input.GetKey(KeyCode.D))
         {
-            Velocity += (Vector3.right * Time.deltaTime * speed);
+            Velocity += (Vector3.right * Time.deltaTime * usedSpeed);
         }
         //a brightness adjuster, for unnecessarily dark computers
         if (Input.GetKey(KeyCode.R) && brightnessAdjuster)

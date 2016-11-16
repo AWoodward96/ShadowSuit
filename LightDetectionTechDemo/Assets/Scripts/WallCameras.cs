@@ -75,7 +75,7 @@ public class WallCameras : MonoBehaviour
         }
         //distance check
         float dist = (transform.position - target.transform.position).magnitude;
-        if(dist > range)
+        if(dist > range || dist < 2)
         {
             return false;
         }
