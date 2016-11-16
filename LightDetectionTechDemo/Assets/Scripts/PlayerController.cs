@@ -21,8 +21,10 @@ public class PlayerController : MonoBehaviour {
     CharacterController myCC;
     Vector3 Velocity;
 
-	// Use this for initialization
-	void Start () {
+    public int noiseLevel;
+
+    // Use this for initialization
+    void Start () {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
         myCC = GetComponent<CharacterController>();
 
@@ -33,8 +35,11 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
         lightIndicator.SetActive(false);
         inLight = false;
+        noiseLevel = 0;
+
         foreach (GameObject spotLight in spotLights)
         {
             if (isLitSpot(spotLight))
@@ -123,18 +128,50 @@ public class PlayerController : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.W))
         {
+            if (usedSpeed == sprintSpeed)
+            {
+                noiseLevel = 2;
+            }
+            else
+            {
+                noiseLevel = 1;
+            }
             Velocity += (Vector3.forward * Time.deltaTime * usedSpeed);
         }
         if (Input.GetKey(KeyCode.A))
         {
+            if (usedSpeed == sprintSpeed)
+            {
+                noiseLevel = 2;
+            }
+            else
+            {
+                noiseLevel = 1;
+            }
             Velocity += (Vector3.left * Time.deltaTime * usedSpeed); 
         }
         if (Input.GetKey(KeyCode.S))
         {
+            if (usedSpeed == sprintSpeed)
+            {
+                noiseLevel = 2;
+            }
+            else
+            {
+                noiseLevel = 1;
+            }
             Velocity += (Vector3.back * Time.deltaTime * usedSpeed); 
         }
         if (Input.GetKey(KeyCode.D))
         {
+            if (usedSpeed == sprintSpeed)
+            {
+                noiseLevel = 2;
+            }
+            else
+            {
+                noiseLevel = 1;
+            }
             Velocity += (Vector3.right * Time.deltaTime * usedSpeed);
         }
         //a brightness adjuster, for unnecessarily dark computers

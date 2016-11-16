@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class EnemyController : MonoBehaviour
 {
+    GameObject player;
+
     public Vector2 startingPos; //the starting position, for level resetting
     Queue<Vector3> pathFollowing = new Queue<Vector3>(); //the queue for following the path around
     public List<GameObject> pathFollowing2 = new List<GameObject>(); //a list for creating the queue, since I couldn't figure out how to make a queue manipulated in the inspector
@@ -35,6 +37,7 @@ public class EnemyController : MonoBehaviour
 
         UnwalkableMask = LayerMask.GetMask("Ground");
 
+        player = GameObject.FindGameObjectWithTag("GamePlayer");
     }
 
     // Update is called once per frame
@@ -44,7 +47,19 @@ public class EnemyController : MonoBehaviour
         {
             Vector3 distanceVector = pathFollowing.Peek() - transform.position;
             Vector3 yZeroDistanceVector = returnYZeroVector3(distanceVector);
-
+            
+            //if the player is sprinting and nearby, the enemy will catch it
+            if(player.GetComponent<PlayerController>().noiseLevel == 2 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 4)
+            {
+                guarding = false;
+                target = player.transform.position;
+            }
+            //if the player is walking and VERY nearby, the enemy will catch it
+            if (player.GetComponent<PlayerController>().noiseLevel == 1 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 1)
+            {
+                guarding = false;
+                target = player.transform.position;
+            }
 
             if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), pathFollowing.Peek()) < .1f)
             {
@@ -58,6 +73,28 @@ public class EnemyController : MonoBehaviour
         }
         else if (target != null) //for chasing (if target is null, the enemy freezes)
         {
+            //the result of the raycast check
+            RaycastHit hit;
+            //the distance between the player and enemy, for raycasting
+            Vector3 dist = player.transform.position - transform.position;
+
+            //finds the maximum distance away the enemy can see the player, based on the players current noise level
+            float range = 0;
+            if(player.GetComponent<PlayerController>().noiseLevel == 2)
+            {
+                range = 25;
+            }
+            if (player.GetComponent<PlayerController>().noiseLevel == 1)
+            {
+                range = 5;
+            }
+            
+            //checks to see if the enemy can see the player(if a raycast between them results in colliding with the player's collider)
+            if (dist.magnitude < range && !(Physics.Raycast(transform.position, dist, out hit) && hit.collider != player.GetComponent<Collider>()))
+            {
+                target = player.transform.position; //...update it's target position
+            }
+
             Vector3 y0Target = returnYZeroVector3(target);
             Vector3 y0Transform = returnYZeroVector3(transform.position);
 
@@ -65,20 +102,17 @@ public class EnemyController : MonoBehaviour
             float toPlayerDist = Vector3.Distance(y0Transform, y0Target);
 
             // Raycast to the player object. If it's within range and there's no object in the way that could prevent movement, just move towards it
-            RaycastHit hit;
-            bool safe = !Physics.Raycast(y0Transform, y0Target - y0Transform, out hit, toPlayerDist, UnwalkableMask);
+            RaycastHit hit2;
+            bool safe = !Physics.Raycast(y0Transform, y0Target - y0Transform, out hit2, toPlayerDist, UnwalkableMask);
             if (safe)
             {
-                //Debug.Log("Simple");
-
                 // First thing is to stop the a Star algorythm
                 StopCoroutine("FollowPath");
                 pathRequested = false; // Gotta make sure this is reset
 
                 // Then move to that location
                 Vector3 v = y0Target - y0Transform;
-
-
+                
                 v.Normalize();
                 Velocity += (v * chaseSpeed);
                 

@@ -26,28 +26,6 @@ public class GameManager : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
-        GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
-        for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
-        {
-            if(!enemies[i].GetComponent<EnemyController>().guarding) //if this enemy is chasing the player, check it's target position. If it can see the player, chase them. If not, go to the players last seen position
-            {
-                //the result of the raycast check
-                RaycastHit hit;
-                //the distance between the player and enemy, for raycasting
-                Vector3 dist = player.transform.position - enemies[i].transform.position;
-
-                //checks to see if the enemy can see the player(if a raycast between them results in colliding with the player's collider)
-                if (Physics.Raycast(enemies[i].transform.position, dist, out hit) && hit.collider != player.GetComponent<Collider>())
-                {
-                }
-                //only chase the player if the enemy can see them
-                else
-                {
-                    enemies[i].GetComponent<EnemyController>().target = player.transform.position; //...update it's target position
-                }
-            }
-        }
     }
 
     public void PlayerInLight() //run this function if the player is lit up
