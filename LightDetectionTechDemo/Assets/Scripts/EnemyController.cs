@@ -23,6 +23,9 @@ public class EnemyController : MonoBehaviour
 
     Vector3 Velocity;
 
+    // For animations
+    AnimatorScript myAnimatorScript;
+
     // Use this for initialization
     void Start()
     {
@@ -38,6 +41,8 @@ public class EnemyController : MonoBehaviour
         UnwalkableMask = LayerMask.GetMask("Ground");
 
         player = GameObject.FindGameObjectWithTag("GamePlayer");
+
+        myAnimatorScript = GetComponent<AnimatorScript>();
     }
 
     // Update is called once per frame
@@ -71,7 +76,7 @@ public class EnemyController : MonoBehaviour
             }
 
         }
-        else if (target != null) //for chasing (if target is null, the enemy freezes)
+        else if (target == Vector3.zero) //for chasing (if target is null, the enemy freezes)
         {
             //the result of the raycast check
             RaycastHit hit;
@@ -139,6 +144,7 @@ public class EnemyController : MonoBehaviour
         }
         else
         {
+            myAnimatorScript.UpdateAnimator(Velocity.x, Velocity.z);
             myCC.Move(Velocity * Time.deltaTime);
             Velocity *= 0;
         }

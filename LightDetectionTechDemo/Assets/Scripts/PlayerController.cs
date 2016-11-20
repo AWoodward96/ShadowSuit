@@ -23,12 +23,17 @@ public class PlayerController : MonoBehaviour {
 
     public int noiseLevel;
 
+    // For Animations
+    AnimatorScript myAnimatorScript;
+
     // Use this for initialization
     void Start () {
         spriteRend = this.GetComponent<SpriteRenderer>();   // grabs the spriteRenderer from the player object
         myCC = GetComponent<CharacterController>();
 
         GameManager.InitializePlayer(transform.position, this);
+
+        myAnimatorScript = GetComponent<AnimatorScript>();
 
         inLight = false;
 	}
@@ -174,6 +179,7 @@ public class PlayerController : MonoBehaviour {
             }
             Velocity += (Vector3.right * Time.deltaTime * usedSpeed);
         }
+
         //a brightness adjuster, for unnecessarily dark computers
         if (Input.GetKey(KeyCode.R) && brightnessAdjuster)
         {
@@ -188,8 +194,15 @@ public class PlayerController : MonoBehaviour {
             GameManager.Restart();
         }
 
-        Velocity += Vector3.down;
 
+        if(myAnimatorScript)
+        {
+            // Send this data to the animator script
+            Vector3 temp = Velocity / Time.deltaTime;
+            myAnimatorScript.UpdateAnimator(temp.x, temp.z, Velocity.magnitude / (3 / usedSpeed));   
+        }
+
+        Velocity += Vector3.down;
         myCC.Move(Velocity);
         Velocity *= .8f;
     }
