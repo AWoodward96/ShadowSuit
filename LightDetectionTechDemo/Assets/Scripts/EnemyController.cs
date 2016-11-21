@@ -76,7 +76,7 @@ public class EnemyController : MonoBehaviour
             }
 
         }
-        else if (target == Vector3.zero) //for chasing (if target is null, the enemy freezes)
+        else if (target != Vector3.zero) //for chasing (if target is null, the enemy freezes)
         {
             //the result of the raycast check
             RaycastHit hit;
