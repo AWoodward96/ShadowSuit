@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 [RequireComponent (typeof(BoxCollider))]
 public class ElevatorScript : MonoBehaviour {
 
     public bool State;
+    public string nextScene;
     bool StageFinished;
     GameObject DoorLeft;
     GameObject DoorRight;
     Light ElevatorLight;
+    
   
 
     Vector3 ClosedPositionRight =  new Vector3( .95f, 1, .5f );
@@ -58,6 +61,8 @@ public class ElevatorScript : MonoBehaviour {
                 ElevatorLight.color = Color.blue;
                 DoorLeft.transform.localPosition = Vector3.Lerp(DoorLeft.transform.localPosition, ClosedPositionLeft, 3f * Time.deltaTime);
                 DoorRight.transform.localPosition = Vector3.Lerp(DoorRight.transform.localPosition, ClosedPositionRight, 3f * Time.deltaTime);
+                SceneManager.LoadScene(nextScene);
+                
             }
 
         }

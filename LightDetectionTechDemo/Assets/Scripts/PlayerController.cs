@@ -105,8 +105,6 @@ public class PlayerController : MonoBehaviour {
         Vector3 lightFlattened = lite.GetComponent<Transform>().position;   // gets position vector of the light
         lightToPlayer.y = 0;    // flattens the forward vector on the y axis
         lightFlattened.y = 0;   // flattens the vector to the player on the y axis
-
-
         RaycastHit hit;
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
