@@ -59,6 +59,7 @@ public class Grid : MonoBehaviour
             for (int y = 0; y < gridSizeY; y++)
             {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
+                //bool walkable = !Physics.CheckBox(worldPoint, new Vector3(nodeRadius-.1f, nodeRadius-.1f, nodeRadius-.1f), Quaternion.identity, unwalkableMask);
                 bool walkable = !Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask);
                 grid[x, y] = new Nodes(walkable, worldPoint, x, y);// Populate our variable
             }
