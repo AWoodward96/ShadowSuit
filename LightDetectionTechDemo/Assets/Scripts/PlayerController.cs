@@ -47,19 +47,43 @@ public class PlayerController : MonoBehaviour {
 
         foreach (GameObject spotLight in spotLights)
         {
-            if (isLitSpot(spotLight))
+            int result = isLitSpot(spotLight);
+            if (result > 0)
             {
                 lightIndicator.SetActive(true);
-                //spriteRend.color = Color.blue;
+                if (result == 100)
+                {
+                    lightIndicator.GetComponent<SpriteRenderer>().color = Color.red;
+                    lightIndicator.transform.localScale = new Vector3(1, 1.2f, 1);
+                }
+                else
+                {
+                    lightIndicator.GetComponent<SpriteRenderer>().color = Color.white;
+                    lightIndicator.transform.localScale = new Vector3(1, result / 100f, 1);
+                }
+
+                //spriteRend.color = Color.red;
                 inLight = true;
                 break;
             }
         }
         foreach (GameObject pointLight in pointLights)
         {
-            if (isLitPoint(pointLight))
+            int result = isLitPoint(pointLight);
+            if (result > 0)
             {
                 lightIndicator.SetActive(true);
+                if (result == 100)
+                {
+                    lightIndicator.GetComponent<SpriteRenderer>().color = Color.red;
+                    lightIndicator.transform.localScale = new Vector3(1, 1.2f, 1);
+                }
+                else
+                {
+                    lightIndicator.GetComponent<SpriteRenderer>().color = Color.white;
+                    lightIndicator.transform.localScale = new Vector3(1, result / 100f, 1);
+                }
+
                 //spriteRend.color = Color.red;
                 inLight = true;
                 break;
@@ -69,7 +93,7 @@ public class PlayerController : MonoBehaviour {
         processInput();
 	}
 
-    bool isLitSpot(GameObject lite) // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a spot light)
+    int isLitSpot(GameObject lite) // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a spot light)
     {
         Light lt = lite.GetComponent<Light>();  // grabs light component
         Vector3 lightToPlayer = this.transform.position - lite.GetComponent<Transform>().position;  // gets a vector from the light to the player
@@ -80,25 +104,31 @@ public class PlayerController : MonoBehaviour {
         float arc = lt.spotAngle;   // gets the spot angle of the light
         float angle = Vector3.Angle(lightForward, lightToPlayer);   // gets the angle between the forward vector and the vector to the player
 
-
         RaycastHit hit;
 
-        if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc/2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
+        if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range) && angle < (arc / 2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
         {
-            //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
-            //lt.color = Color.red;
-            GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
-            return true;
+            if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc / 2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
+            {
+                //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
+                //lt.color = Color.red;
+                GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
+                return 100;
+            }
+            else
+            {
+                return (int)(((lt.range - hit.distance)) * 100 / (lt.range * .6f));
+            }
         }
         else
         {
             lt.color = Color.white;
-            return false;
+            return 0;
         }
 
     }
 
-    bool isLitPoint(GameObject lite)    // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a point light)
+    int isLitPoint(GameObject lite)    // checks to see if the light passed in as a parameter is lighting the player (assumes that it is a point light)
     {
         Light lt = lite.GetComponent<Light>();  // grabs light component
         Vector3 lightToPlayer = this.transform.position - lite.GetComponent<Transform>().position;  // gets a vecctor from the light to the player
@@ -107,17 +137,24 @@ public class PlayerController : MonoBehaviour {
         lightFlattened.y = 0;   // flattens the vector to the player on the y axis
         RaycastHit hit;
 
-        if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
+        if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
         {
-            //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
-           // lt.color = Color.red;
-            GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
-            return true;
+            if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .7f) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
+            {
+                //Debug.DrawRay(lightFlattened, lightToPlayer, Color.green);  // draws debug ray
+                // lt.color = Color.red;
+                GameObject.Find("GameManager").GetComponent<GameManager>().PlayerInLight(); //guards chase player
+                return 100;
+            }
+            else
+            {
+                return (int)(((lt.range - hit.distance)) * 100 / (lt.range * .3f));
+            }
         }
         else
         {
             lt.color = Color.white;
-            return false;
+            return 0;
         }
 
     }
