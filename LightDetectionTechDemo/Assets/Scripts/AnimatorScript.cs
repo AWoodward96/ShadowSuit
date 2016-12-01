@@ -20,6 +20,7 @@ public class AnimatorScript : MonoBehaviour {
         if (horezAbs <= .5 && vertAbs <= .5)
             isMoving = false;
         else
+            //Debug.Log(horez + " - " + vert);
             isMoving = true;
 
         // Only update the direction if we're moving

@@ -50,7 +50,8 @@ public class EnemyController : MonoBehaviour
     {
         if (guarding) //for pathing
         {
-            Vector3 distanceVector = pathFollowing.Peek() - transform.position;
+            Vector3 nextPoint = pathFollowing.Peek();
+            Vector3 distanceVector = nextPoint - transform.position;
             Vector3 yZeroDistanceVector = returnYZeroVector3(distanceVector);
             
             //if the player is sprinting and nearby, the enemy will catch it
@@ -65,8 +66,8 @@ public class EnemyController : MonoBehaviour
                 guarding = false;
                 target = player.transform.position;
             }
-
-            if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), pathFollowing.Peek()) < .1f)
+            
+            if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), nextPoint) < .1f)
             {
                 nextPath();
             }
@@ -136,7 +137,7 @@ public class EnemyController : MonoBehaviour
 
         //enemy stops chasing and begins guarding if it is close to it's target
         //right now, enemy and player collide at about .9 away so checking any further will make the enemy leave before killing the player
-        if ((transform.position - target).magnitude < .35)
+        if (!guarding && Vector3.Distance(transform.position, target) < .35)
         {
             target = Vector3.zero;
             guarding = true;
@@ -149,8 +150,7 @@ public class EnemyController : MonoBehaviour
             Velocity *= 0;
         }
     }
-
-
+    
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
         if (pathSuccessful)

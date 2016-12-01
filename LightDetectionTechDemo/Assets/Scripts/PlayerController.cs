@@ -106,6 +106,11 @@ public class PlayerController : MonoBehaviour {
 
         RaycastHit hit;
 
+        if(!lite.activeSelf)
+        {
+            return 0;
+        }
+
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range) && angle < (arc / 2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
         {
             if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range * .4f) && angle < (arc / 2) && hit.transform == this.transform)  // checks to see if it is close enough to the player to actually cast light AND if it is within the arc of light 
@@ -136,6 +141,11 @@ public class PlayerController : MonoBehaviour {
         lightToPlayer.y = 0;    // flattens the forward vector on the y axis
         lightFlattened.y = 0;   // flattens the vector to the player on the y axis
         RaycastHit hit;
+
+        if (!lite.activeSelf)
+        {
+            return 0;
+        }
 
         if (Physics.Raycast(lightFlattened, lightToPlayer, out hit, lt.range) && hit.transform == this.transform) // checks to see if it is close enough to the player to actually cast light
         {
@@ -224,7 +234,7 @@ public class PlayerController : MonoBehaviour {
         {
             brightnessAdjuster.intensity -= .01f;
         }
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Escape))
         {
             GameManager.Restart();
         }

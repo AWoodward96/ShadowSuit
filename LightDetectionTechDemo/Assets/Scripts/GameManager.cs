@@ -81,7 +81,16 @@ public class GameManager : MonoBehaviour
             enemies[i].GetComponent<EnemyController>().resetPath(); //makes sure this enemies path is followed in the right order
         }
         GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
-        player.transform.position =playerStartingPosition; //sets the player to it's starting position
+        player.transform.position = playerStartingPosition; //sets the player to it's starting position
+        GameObject[] console = GameObject.FindGameObjectsWithTag("Console"); //gets all tagged consoles
+        for (int i = 0; i < console.Length; i++) //loops through all the consoles
+        {
+            //resets the console and all its attached objects to their default state
+            if (console[i].GetComponent<Console>().currentState != console[i].GetComponent<Console>().defaultState)
+            {
+                console[i].GetComponent<Console>().ToggleLights();
+            }
+        }
     }
 
 

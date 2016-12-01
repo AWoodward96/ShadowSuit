@@ -23,9 +23,14 @@ public class CameraScript : MonoBehaviour {
             case Mode.FollowPlayer:
 
                 Vector3 Additive = PlayerObject.transform.position + FromFollowPoint;
-                Additive += HandleCursorWorldPointPosition();
+                //if (Input.GetKey(KeyCode.Space))
+                {
+                    Additive += HandleCursorWorldPointPosition();
+                    Additive.x /= 2;
+                    Additive.y /= 2;
+                }
                 //Additive += PlayerObject.transform.position + FromFollowPoint;
-                Additive /= 2;
+                Additive.z /= 2;
 
                 Additive.y = PlayerObject.transform.position.y + FromFollowPoint.y;
                 transform.position = Vector3.Lerp(transform.position, Additive, 3f * Time.deltaTime);

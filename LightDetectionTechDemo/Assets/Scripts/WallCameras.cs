@@ -13,8 +13,8 @@ public class WallCameras : MonoBehaviour
     public float rotateLeft;
     public float rotateRight;
     bool direcLeft = true;
-
-    int counter = 0;
+    public int alertRange;
+    Rect alertRect;
 
     public int visionDetail = 200;
     Texture2D blankTexture;
@@ -44,6 +44,8 @@ public class WallCameras : MonoBehaviour
             rotateRight = angleDirection;
             direcLeft = true;
         }
+
+        alertRect = new Rect(transform.position.x - alertRange, transform.position.z - alertRange, alertRange * 2, alertRange * 2);
 	}
 
     // Update is called once per frame
@@ -80,6 +82,17 @@ public class WallCameras : MonoBehaviour
             if (player.GetComponent<PlayerController>().InLight)
             {
                 gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
+                GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
+                for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
+                {
+                    Debug.Log("Any - " + Vector2.Distance(alertRect.position, new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)));
+                    if(alertRect.Contains(new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)))
+                    {
+                        //enemies go to where the player was last seen
+                        enemies[i].GetComponent<EnemyController>().guarding = false;
+                        enemies[i].GetComponent<EnemyController>().target = player.transform.position;
+                    }
+                }
             }
             else
             {
@@ -90,13 +103,7 @@ public class WallCameras : MonoBehaviour
         {
             gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
         }
-
-        //attempting to control framerate issues in any way
-        counter++;
-        if (counter == 3)
-        {
-            counter = 0;
-        }
+        
         createNewVision();
     }
 
@@ -188,7 +195,7 @@ public class WallCameras : MonoBehaviour
         }
         //distance check
         float dist = (transform.position - target.transform.position).magnitude;
-        if(dist > range || dist < range/5)
+        if(dist > range/* || dist < range/5*/)
         {
             return false;
         }
