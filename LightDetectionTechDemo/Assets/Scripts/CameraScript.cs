@@ -11,6 +11,8 @@ public class CameraScript : MonoBehaviour {
 
     Plane cursorPlane;
 
+    public int stretchDistance = 10;
+
     // Use this for initialization
     void Start () {
         PlayerObject = GameObject.FindGameObjectWithTag("GamePlayer");
@@ -23,14 +25,15 @@ public class CameraScript : MonoBehaviour {
             case Mode.FollowPlayer:
 
                 Vector3 Additive = PlayerObject.transform.position + FromFollowPoint;
-                //if (Input.GetKey(KeyCode.Space))
+                if (!Input.GetKey(KeyCode.Space))
                 {
                     Additive += HandleCursorWorldPointPosition();
-                    Additive.x /= 2;
-                    Additive.y /= 2;
+                    Additive /= 2;
                 }
-                //Additive += PlayerObject.transform.position + FromFollowPoint;
-                Additive.z /= 2;
+                else
+                {
+                    Additive.z += 5f;
+                }
 
                 Additive.y = PlayerObject.transform.position.y + FromFollowPoint.y;
                 transform.position = Vector3.Lerp(transform.position, Additive, 3f * Time.deltaTime);
@@ -59,9 +62,9 @@ public class CameraScript : MonoBehaviour {
         {
             Vector3 point = ray.GetPoint(dist);
 
-            if(Vector3.Distance(PlayerObject.transform.position, point) > 5)
+            if (Vector3.Distance(PlayerObject.transform.position, point) > stretchDistance)
             {
-                point = PlayerObject.transform.position + (((point - PlayerObject.transform.position).normalized) * 5);
+                point = PlayerObject.transform.position + (((point - PlayerObject.transform.position).normalized) * stretchDistance);
             }
 
             return point; // Get the point
