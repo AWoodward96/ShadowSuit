@@ -55,6 +55,7 @@ public class PlayerController : MonoBehaviour {
                 {
                     lightIndicator.GetComponent<SpriteRenderer>().color = Color.red;
                     lightIndicator.transform.localScale = new Vector3(1, 1.2f, 1);
+                    inLight = true;
                 }
                 else
                 {
@@ -63,7 +64,6 @@ public class PlayerController : MonoBehaviour {
                 }
 
                 //spriteRend.color = Color.red;
-                inLight = true;
                 break;
             }
         }
@@ -77,6 +77,7 @@ public class PlayerController : MonoBehaviour {
                 {
                     lightIndicator.GetComponent<SpriteRenderer>().color = Color.red;
                     lightIndicator.transform.localScale = new Vector3(1, 1.2f, 1);
+                    inLight = true;
                 }
                 else
                 {
@@ -85,7 +86,6 @@ public class PlayerController : MonoBehaviour {
                 }
 
                 //spriteRend.color = Color.red;
-                inLight = true;
                 break;
             }
         }

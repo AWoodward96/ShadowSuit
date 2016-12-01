@@ -24,10 +24,10 @@ public class WallCameras : MonoBehaviour
     void Start ()
     {
         //basic blank texture to base the actual camera texture on
-        blankTexture = new Texture2D(visionDetail * range, visionDetail * range, TextureFormat.ARGB32, false);
-        for (int i = 0; i < visionDetail * range; i++)
+        blankTexture = new Texture2D((visionDetail * range)+1, (visionDetail * range)+1, TextureFormat.ARGB32, false);
+        for (int i = 0; i < (visionDetail * range)+1; i++)
         {
-            for (int i2 = 0; i2 < visionDetail * range; i2++)
+            for (int i2 = 0; i2 < (visionDetail * range)+1; i2++)
             {
                 blankTexture.SetPixel(i, i2, Color.clear);
             }
@@ -36,7 +36,7 @@ public class WallCameras : MonoBehaviour
         blankTexture.Apply();
 
         createVisionPath();
-        createVision();
+        //createVision();
 
         if (rotateLeft == 0)
         {
@@ -101,7 +101,55 @@ public class WallCameras : MonoBehaviour
         {
             counter = 0;
         }
-        createVision();
+        createNewVision();
+    }
+    public void createNewVision()
+    {
+
+        // Create a new texture ARGB32 (32 bit with alpha) and no mipmaps
+        var texture = new Texture2D((visionDetail * range)+1, (visionDetail * range)+1, TextureFormat.ARGB32, false);
+        //var texture = blankTexture;
+        texture.SetPixels(blankTexture.GetPixels());
+        
+        RaycastHit hit;
+
+        //scaled size of each pixel, inverted (200 is max size)
+        int numb = visionDetail;
+
+        //scales the image to be the size it should be
+        gameObject.transform.GetChild(0).transform.localScale = new Vector3(200 / numb, 200 / numb, 0);
+
+        float angleDetail = .25f;
+
+        //creates a set of raycasts at incrementing angles. These angles are used to check sets of pixels instead of each pixel raycasting
+        float[] rayDist = new float[(int)(((angleDirection + angleRange) - (angleDirection - angleRange)) / angleDetail) + 1];
+        for (int i = 0; i <= ((angleDirection + angleRange) - (angleDirection - angleRange)) / angleDetail; i++)
+        {
+            if (Physics.Raycast(transform.position, new Vector3(-Mathf.Cos(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail))), transform.position.y, -Mathf.Sin(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), out hit, range) && hit.collider == scene.GetComponent<Collider>())
+            {
+                rayDist[i] = hit.distance;
+                //Debug.DrawLine(transform.position, transform.position - new Vector3(hit.distance * Mathf.Cos(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail))), transform.position.y, hit.distance * Mathf.Sin(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), Color.green);  // draws debug ray
+
+            }
+            else
+            {
+                rayDist[i] = 10;
+                Debug.DrawLine(transform.position, transform.position - new Vector3(range * Mathf.Cos(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail))), transform.position.y, range * Mathf.Sin(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), Color.green);  // draws debug ray
+                for (int i2 = 0; i2 < texture.width / 2; i2++)
+                {
+                    //float percent = 10 * i2 / (texture.width / 2);
+                    //texture.SetPixel((texture.width / 2) + (int)(i2 * -Mathf.Cos(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), (texture.height / 2) + (int)((i2) * Mathf.Sin(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i  * angleDetail)))), Color.red);
+                }
+                texture.SetPixel((texture.width / 2) + (int)((texture.width / 2) * -Mathf.Cos(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), (texture.height / 2) + (int)((texture.width / 2) * Mathf.Sin(Mathf.Deg2Rad * ((angleDirection - angleRange) + (i * angleDetail)))), Color.white);
+            }
+        }
+
+        // Apply all SetPixel calls
+        texture.Apply();
+
+        // connect texture to material of GameObject this script is attached to
+        gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        //gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite.texture = texture;
     }
 
     //THIS STILL CAUSES LOTS OF LAG
