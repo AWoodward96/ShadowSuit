@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,6 +15,15 @@ public class Console : MonoBehaviour {
     public bool currentState;
     public bool defaultState;
 
+    public enum Purpose
+    {
+        lights,
+        camera,
+        exit,
+    };
+
+    public Purpose action;
+
     // Use this for initialization
     void Start()
     {
@@ -21,6 +31,18 @@ public class Console : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("GamePlayer");
         currentState = false;
         defaultState = false;
+        if (action == Purpose.lights)
+        {
+            gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.green;
+        }
+        if (action == Purpose.camera)
+        {
+            gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
+        }
+        if (action == Purpose.exit)
+        {
+            gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
+        }
     }
 
     // Update is called once per frame
@@ -38,7 +60,21 @@ public class Console : MonoBehaviour {
             if (hit.collider == player.GetComponent<Collider>())
             {
                 //toggle associated lights
-                ToggleLights();
+                if (action == Purpose.lights)
+                {
+                    ToggleLights();
+                }
+                if (action == Purpose.camera)
+                {
+                    DisableCamera();
+                }
+                if (action == Purpose.exit)
+                {
+                    OpenExit();
+                }
+                currentState = !currentState;
+                gameObject.transform.GetChild(1).transform.GetChild(0).gameObject.SetActive(!currentState);
+                gameObject.transform.GetChild(2).transform.GetChild(0).gameObject.SetActive(currentState);
             }
         }
     }
@@ -49,7 +85,21 @@ public class Console : MonoBehaviour {
         {
             //light.enabled = !light.enabled;
             light.SetActive(!light.activeSelf);
-            currentState = !currentState;
+        }
+    }
+    public void OpenExit()
+    {
+        foreach (GameObject exit in lights)
+        {
+            exit.GetComponent<ElevatorScript>().State = !exit.GetComponent<ElevatorScript>().State;
+        }
+    }
+    public void DisableCamera()
+    {
+        foreach (GameObject camera in lights)
+        {
+            //light.enabled = !light.enabled;
+            camera.SetActive(!camera.activeSelf);
         }
     }
 }

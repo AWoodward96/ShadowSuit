@@ -93,7 +93,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     public static void InitializePlayer(Vector3 startingPosition, PlayerController pc)
     {
         // Set up the player reset poisition

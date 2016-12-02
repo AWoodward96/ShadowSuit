@@ -52,14 +52,13 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         switch (myState)
         {
             case AIState.Guarding:
 
                 Guarding();
-
                 break;
+
             case AIState.Chasing:
                 Chasing();
                 break;
@@ -99,6 +98,8 @@ public class EnemyController : MonoBehaviour
         bool safe = !Physics.Raycast(transform.position, dist, out hit, dist.magnitude, UnwalkableMask);
         if (safe)
         {
+            Debug.Log("CAN SEE PLAYER");
+            Debug.DrawLine(transform.position, player.transform.position, Color.green);  // draws debug ray
             // Then move towards the player
             LastSeenPosition = target.position; // Update the last seen position
             
@@ -151,12 +152,8 @@ public class EnemyController : MonoBehaviour
                     waitingRequested = true;
                     StartCoroutine(WaitAtPosition());
                 }
-
-
             }
         }
-
-
     }
 
     void Guarding()

@@ -85,7 +85,7 @@ public class WallCameras : MonoBehaviour
                 GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
                 for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
                 {
-                    Debug.Log("Any - " + Vector2.Distance(alertRect.position, new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)));
+                    //Debug.Log("Any - " + Vector2.Distance(alertRect.position, new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)));
                     if(alertRect.Contains(new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)))
                     {
                         //enemies go to where the player was last seen
