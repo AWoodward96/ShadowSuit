@@ -45,13 +45,13 @@ public class GameManager : MonoBehaviour
             {
             }
             //only chase the player if the enemy can see them
-            else
+            else if (!enemies[i].GetComponent<EnemyController>().busy)
             {
                 enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Chasing; //sets this enemy to chase the player
-                enemies[i].GetComponent<EnemyController>().target = player.transform; //sets the enemies target to the player's position
+                enemies[i].GetComponent<EnemyController>().target = player; //sets the enemies target to the player's position
             }
         }
-        GameObject[] cameras = GameObject.FindGameObjectsWithTag("WallCamera"); //gets all tagged wall cameras
+        /*GameObject[] cameras = GameObject.FindGameObjectsWithTag("WallCamera"); //gets all tagged wall cameras
         for (int i = 0; i < cameras.Length; i++) //loops through all the cameras
         {
             //check if the camera can see the player
@@ -60,15 +60,15 @@ public class GameManager : MonoBehaviour
                 for (int i2 = 0; i2 < enemies.Length; i2++) //loops through all the enemies
                 {
                     //only change enemies that don't presently know where the player is
-                    if (enemies[i2].GetComponent<EnemyController>().myState == EnemyController.AIState.Guarding)
+                    if (enemies[i2].GetComponent<EnemyController>().myState != EnemyController.AIState.Chasing && !enemies[i2].GetComponent<EnemyController>().busy)
                     {
                         //enemies go to where the player was last seen
                         enemies[i2].GetComponent<EnemyController>().myState = EnemyController.AIState.Chasing;
-                        enemies[i2].GetComponent<EnemyController>().target = player.transform;
+                        enemies[i2].GetComponent<EnemyController>().target = player;
                     }
                 }
             }
-        }
+        }*/
     }
 
     public static void Restart() //resets the level to it's original state
@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
             //resets the console and all its attached objects to their default state
             if (console[i].GetComponent<Console>().currentState != console[i].GetComponent<Console>().defaultState)
             {
-                console[i].GetComponent<Console>().ToggleLights();
+                console[i].GetComponent<Console>().TriggerConsole();
             }
         }
     }

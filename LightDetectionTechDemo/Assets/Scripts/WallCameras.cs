@@ -15,6 +15,7 @@ public class WallCameras : MonoBehaviour
     bool direcLeft = true;
     public int alertRange;
     Rect alertRect;
+    public bool deActivated;
 
     public int visionDetail = 200;
     Texture2D blankTexture;
@@ -46,65 +47,75 @@ public class WallCameras : MonoBehaviour
         }
 
         alertRect = new Rect(transform.position.x - alertRange, transform.position.z - alertRange, alertRange * 2, alertRange * 2);
+        deActivated = false;
 	}
 
     // Update is called once per frame
     void Update()
     {
-        if (direcLeft && rotateLeft != angleDirection)
+        if (!deActivated)
         {
-            //disabling rotation for now
-            angleDirection += .5f;
-            if (Mathf.Abs(rotateLeft - angleDirection) < 1)
+
+
+            if (direcLeft && rotateLeft != angleDirection)
             {
-                direcLeft = false;
-            }
-        }
-        if (!direcLeft && rotateRight != angleDirection)
-        {
-            //disabling rotation for now
-            angleDirection -= .5f;
-            if (Mathf.Abs(rotateRight - angleDirection) < 1)
-            {
-                direcLeft = true;
-            }
-        }
-        while (angleDirection > 360)
-        {
-            angleDirection -= 360;
-        }
-        while (angleDirection < 0)
-        {
-            angleDirection += 360;
-        }
-        if (CanSee(player))
-        {
-            if (player.GetComponent<PlayerController>().InLight)
-            {
-                gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
-                GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
-                for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
+                //disabling rotation for now
+                angleDirection += .5f;
+                if (Mathf.Abs(rotateLeft - angleDirection) < 1)
                 {
-                    //Debug.Log("Any - " + Vector2.Distance(alertRect.position, new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)));
-                    if(alertRect.Contains(new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)))
+                    direcLeft = false;
+                }
+            }
+            if (!direcLeft && rotateRight != angleDirection)
+            {
+                //disabling rotation for now
+                angleDirection -= .5f;
+                if (Mathf.Abs(rotateRight - angleDirection) < 1)
+                {
+                    direcLeft = true;
+                }
+            }
+            while (angleDirection > 360)
+            {
+                angleDirection -= 360;
+            }
+            while (angleDirection < 0)
+            {
+                angleDirection += 360;
+            }
+            if (CanSee(player))
+            {
+                if (player.GetComponent<PlayerController>().InLight)
+                {
+                    gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.red;
+                    GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
+                    for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
                     {
-                        //enemies go to where the player was last seen
-                        enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Guarding;
-                        enemies[i].GetComponent<EnemyController>().target = player.transform;
+                        //Debug.Log("Any - " + Vector2.Distance(alertRect.position, new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)));
+                        if (alertRect.Contains(new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)) && !enemies[i].GetComponent<EnemyController>().busy)
+                        {
+                            //enemies go to where the player was last seen
+                            enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Chasing;
+                            enemies[i].GetComponent<EnemyController>().target = player;
+                        }
                     }
+                }
+                else
+                {
+                    gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
                 }
             }
             else
             {
-                gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
+                gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
             }
+
+            createNewVision();
         }
         else
         {
-            gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.white;
+            gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Sprite.Create(blankTexture, new Rect(0, 0, blankTexture.width, blankTexture.height), new Vector2(0.5f, 0.5f));
         }
-        
-        createNewVision();
     }
 
     //new way of creating camera vision

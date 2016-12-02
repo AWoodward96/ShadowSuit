@@ -11,8 +11,9 @@ public class EnemyController : MonoBehaviour
     public List<GameObject> pathFollowing2 = new List<GameObject>(); //a list for creating the queue, since I couldn't figure out how to make a queue manipulated in the inspector
     int guardSpeed = 3; //speed for pathing
     int chaseSpeed = 5; //speed for chasing the player
-    public Transform target; //the enemies target, to be set to the player's x and z position
+    public GameObject target; //the enemies target, to be set to the player's x and z position
     CharacterController myCC;
+    public bool busy;
 
     Vector3[] path;
     bool pathRequested;
@@ -22,17 +23,18 @@ public class EnemyController : MonoBehaviour
     LayerMask UnwalkableMask;
 
     Vector3 Velocity;
-   public Vector3 LastSeenPosition;
+    public Vector3 LastSeenPosition;
 
     // For animations
     AnimatorScript myAnimatorScript;
 
-    public enum AIState { Guarding, Chasing };
+    public enum AIState { Guarding, Chasing, Inspecting };
     public AIState myState;
 
     // Use this for initialization
     void Start()
     {
+        busy = false;
         myCC = GetComponent<CharacterController>();
         startingPos = new Vector2(transform.position.x, transform.position.z); //set the starting position
         for (int i = 0; i < pathFollowing2.Count; i++) //converts the list to a queue
@@ -62,6 +64,10 @@ public class EnemyController : MonoBehaviour
             case AIState.Chasing:
                 Chasing();
                 break;
+
+            case AIState.Inspecting:
+                Inspecting();
+                break;
         }
 
 
@@ -70,12 +76,12 @@ public class EnemyController : MonoBehaviour
 
         //enemy stops chasing and begins guarding if it is close to it's target
         //right now, enemy and player collide at about .9 away so checking any further will make the enemy leave before killing the player
-        if (myState != AIState.Guarding && Vector3.Distance(transform.position, target.position) < .35)
+        //if (myState != AIState.Guarding && Vector3.Distance(transform.position, target.position) < .35)
         {
-            myState = AIState.Guarding;
-            SetClosestPath();
+            //myState = AIState.Guarding;
+            //SetClosestPath();
         }
-        else
+        //else
         {
             myAnimatorScript.UpdateAnimator(Velocity.x, Velocity.z);
             myCC.Move(Velocity * Time.deltaTime);
@@ -98,10 +104,9 @@ public class EnemyController : MonoBehaviour
         bool safe = !Physics.Raycast(transform.position, dist, out hit, dist.magnitude, UnwalkableMask);
         if (safe)
         {
-            Debug.Log("CAN SEE PLAYER");
-            Debug.DrawLine(transform.position, player.transform.position, Color.green);  // draws debug ray
+            //Debug.Log("CAN SEE PLAYER");
             // Then move towards the player
-            LastSeenPosition = target.position; // Update the last seen position
+            LastSeenPosition = target.transform.position; // Update the last seen position
             
             // Now move towards that position
             // First thing is to stop the a Star algorythm
@@ -113,7 +118,7 @@ public class EnemyController : MonoBehaviour
             StopCoroutine("WaitAtPosition");
 
             // Then move to that location
-            Vector3 v = returnYZeroVector3(target.position) - returnYZeroVector3(transform.position);
+            Vector3 v = returnYZeroVector3(target.transform.position) - returnYZeroVector3(transform.position);
 
             v.Normalize();
             Velocity += (v * chaseSpeed);
@@ -166,13 +171,13 @@ public class EnemyController : MonoBehaviour
         if (player.GetComponent<PlayerController>().noiseLevel == 2 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 4)
         {
             myState = AIState.Chasing;
-            target = player.transform;
+            target = player;
         }
         //if the player is walking and VERY nearby, the enemy will catch it
         if (player.GetComponent<PlayerController>().noiseLevel == 1 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 1)
         {
             myState = AIState.Chasing;
-            target = player.transform;
+            target = player;
         }
 
         if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), nextPoint) < .1f)
@@ -196,8 +201,50 @@ public class EnemyController : MonoBehaviour
                 pathIndex = 0;
                 PathRequestManager.RequestPath(transform.position, nextPoint, OnPathFound);
             }
-
         }
+
+        //check if there are consoles to inspect
+        //wish this used aStar to path find around walls, but i don't know aStar
+        GameObject[] consoles = GameObject.FindGameObjectsWithTag("Console"); //gets all tagged consoles
+        RaycastHit hit;
+        for (int i = 0; i < consoles.Length; i++) //loops through all the enemies
+        {
+            if (Vector3.Distance(transform.position, consoles[i].transform.position) < 15 && consoles[i].GetComponent<Console>().canBeChecked)
+            {
+                Vector3 dist = consoles[i].transform.position - transform.position;
+                if(!Physics.Raycast(transform.position, dist, out hit, dist.magnitude, UnwalkableMask))
+                {
+                    myState = AIState.Inspecting;
+                    target = consoles[i];
+                }
+            }
+        }
+    }
+
+    void Inspecting()
+    { 
+        //the distance between the player and enemy, for raycasting
+        Vector3 dist = target.transform.position - transform.position;
+
+        //PathRequestManager.RequestPath(transform.position, LastSeenPosition, OnPathFound);
+        
+        if (Vector3.Distance(transform.position, target.transform.position) > 2.5f)
+            {
+                // Move towards that last known position
+                Vector3 v = returnYZeroVector3(target.transform.position) - returnYZeroVector3(transform.position);
+                v.Normalize();
+                Velocity += (v * chaseSpeed);
+            }
+            else
+            {
+                // Ok so we're close enough to the last seen position to stop and wait for a bit
+                // Request the wait
+                if (!waitingRequested)
+                {
+                    waitingRequested = true;
+                    StartCoroutine(WaitAtConsole());
+                }
+            }
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
@@ -252,6 +299,20 @@ public class EnemyController : MonoBehaviour
         waitingRequested = false;
         myState = AIState.Guarding;
         SetClosestPath();
+    }
+
+    IEnumerator WaitAtConsole()
+    {
+        busy = true;
+        yield return new WaitForSeconds(3);
+        busy = false;
+        waitingRequested = false;
+        myState = AIState.Guarding;
+        SetClosestPath();
+        if (target.GetComponent<Console>().currentState != target.GetComponent<Console>().defaultState)
+        {
+            target.GetComponent<Console>().TriggerConsole();
+        }
     }
 
     void nextPath() //set the next path point to the first one, while moving the first to the end
