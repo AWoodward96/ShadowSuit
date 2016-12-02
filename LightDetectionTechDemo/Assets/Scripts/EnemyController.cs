@@ -11,20 +11,24 @@ public class EnemyController : MonoBehaviour
     public List<GameObject> pathFollowing2 = new List<GameObject>(); //a list for creating the queue, since I couldn't figure out how to make a queue manipulated in the inspector
     int guardSpeed = 3; //speed for pathing
     int chaseSpeed = 5; //speed for chasing the player
-    public bool guarding = true; //a bool saying whether the enemy is pathing or chasing (true is pathing)
-    public Vector3 target; //the enemies target, to be set to the player's x and z position
+    public Transform target; //the enemies target, to be set to the player's x and z position
     CharacterController myCC;
 
     Vector3[] path;
     bool pathRequested;
+    bool waitingRequested;
     int pathIndex;
 
     LayerMask UnwalkableMask;
 
     Vector3 Velocity;
+   public Vector3 LastSeenPosition;
 
     // For animations
     AnimatorScript myAnimatorScript;
+
+    public enum AIState { Guarding, Chasing };
+    public AIState myState;
 
     // Use this for initialization
     void Start()
@@ -48,99 +52,28 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (guarding) //for pathing
+
+        switch (myState)
         {
-            Vector3 nextPoint = pathFollowing.Peek();
-            Vector3 distanceVector = nextPoint - transform.position;
-            Vector3 yZeroDistanceVector = returnYZeroVector3(distanceVector);
-            
-            //if the player is sprinting and nearby, the enemy will catch it
-            if(player.GetComponent<PlayerController>().noiseLevel == 2 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 4)
-            {
-                guarding = false;
-                target = player.transform.position;
-            }
-            //if the player is walking and VERY nearby, the enemy will catch it
-            if (player.GetComponent<PlayerController>().noiseLevel == 1 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 1)
-            {
-                guarding = false;
-                target = player.transform.position;
-            }
-            
-            if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), nextPoint) < .1f)
-            {
-                nextPath();
-            }
-            else
-            {
-                Velocity += (yZeroDistanceVector.normalized * guardSpeed);
-            }
+            case AIState.Guarding:
 
+                Guarding();
+
+                break;
+            case AIState.Chasing:
+                Chasing();
+                break;
         }
-        else if (target != Vector3.zero) //for chasing (if target is null, the enemy freezes)
-        {
-            //the result of the raycast check
-            RaycastHit hit;
-            //the distance between the player and enemy, for raycasting
-            Vector3 dist = player.transform.position - transform.position;
 
-            //finds the maximum distance away the enemy can see the player, based on the players current noise level
-            float range = 0;
-            if(player.GetComponent<PlayerController>().noiseLevel == 2)
-            {
-                range = 25;
-            }
-            if (player.GetComponent<PlayerController>().noiseLevel == 1)
-            {
-                range = 5;
-            }
-            
-            //checks to see if the enemy can see the player(if a raycast between them results in colliding with the player's collider)
-            if (dist.magnitude < range && !(Physics.Raycast(transform.position, dist, out hit) && hit.collider != player.GetComponent<Collider>()))
-            {
-                target = player.transform.position; //...update it's target position
-            }
-
-            Vector3 y0Target = returnYZeroVector3(target);
-            Vector3 y0Transform = returnYZeroVector3(transform.position);
-
-            // First thing to do is to make sure you're far enough away from the player that you need to move closer to him
-            float toPlayerDist = Vector3.Distance(y0Transform, y0Target);
-
-            // Raycast to the player object. If it's within range and there's no object in the way that could prevent movement, just move towards it
-            RaycastHit hit2;
-            bool safe = !Physics.Raycast(y0Transform, y0Target - y0Transform, out hit2, toPlayerDist, UnwalkableMask);
-            if (safe)
-            {
-                // First thing is to stop the a Star algorythm
-                StopCoroutine("FollowPath");
-                pathRequested = false; // Gotta make sure this is reset
-
-                // Then move to that location
-                Vector3 v = y0Target - y0Transform;
-                
-                v.Normalize();
-                Velocity += (v * chaseSpeed);
-                
-            }
-            else if (!pathRequested)
-            {
-                //Debug.Log("A Star");
-                pathRequested = true;
-                pathIndex = 0;
-                PathRequestManager.RequestPath(transform.position, target, OnPathFound);
-            }
-        }
 
         //makes sure enemies stay on the ground (no floating off elevated parts)
         Velocity += Vector3.down * 5;
 
         //enemy stops chasing and begins guarding if it is close to it's target
         //right now, enemy and player collide at about .9 away so checking any further will make the enemy leave before killing the player
-        if (!guarding && Vector3.Distance(transform.position, target) < .35)
+        if (myState != AIState.Guarding && Vector3.Distance(transform.position, target.position) < .35)
         {
-            target = Vector3.zero;
-            guarding = true;
+            myState = AIState.Guarding;
             SetClosestPath();
         }
         else
@@ -149,8 +82,127 @@ public class EnemyController : MonoBehaviour
             myCC.Move(Velocity * Time.deltaTime);
             Velocity *= 0;
         }
+
+
     }
-    
+
+    void Chasing()
+    {
+        // Ok move towards the last place you saw the players position
+
+        //the result of the raycast check
+        RaycastHit hit;
+        //the distance between the player and enemy, for raycasting
+        Vector3 dist = player.transform.position - transform.position;
+
+        // Check to see if you can see the player right now
+        bool safe = !Physics.Raycast(transform.position, dist, out hit, dist.magnitude, UnwalkableMask);
+        if (safe)
+        {
+            // Then move towards the player
+            LastSeenPosition = target.position; // Update the last seen position
+            
+            // Now move towards that position
+            // First thing is to stop the a Star algorythm
+            StopCoroutine("FollowPath");
+            pathRequested = false; // Gotta make sure this is reset
+
+            // Also stop the wait coroutine
+            waitingRequested = false;
+            StopCoroutine("WaitAtPosition");
+
+            // Then move to that location
+            Vector3 v = returnYZeroVector3(target.position) - returnYZeroVector3(transform.position);
+
+            v.Normalize();
+            Velocity += (v * chaseSpeed);
+ 
+        }
+        else
+        {
+            // Ok so we can't actively see the player. Lets move to the last known position
+
+            // In the event that you just straight up can't see the last seen position --- wait
+            //RaycastHit lastseenHit;
+            //bool canSee = !Physics.Raycast(transform.position, LastSeenPosition - transform.position, out lastseenHit, UnwalkableMask);
+            //if(!canSee)
+            //{
+            //    if (!waitingRequested)
+            //    {
+            //        waitingRequested = true;
+            //        StartCoroutine(WaitAtPosition());
+            //    }
+            //    return;
+            //}
+
+            if (Vector3.Distance(transform.position, LastSeenPosition) > .5f)
+            {
+                // Move towards that last known position
+                Vector3 v = returnYZeroVector3(LastSeenPosition) - returnYZeroVector3(transform.position);
+                v.Normalize();
+                Velocity += (v * chaseSpeed); 
+            }
+            else
+            {
+                // Ok so we're close enough to the last seen position to stop and wait for a bit
+                // Request the wait
+                if(!waitingRequested)
+                {
+                    waitingRequested = true;
+                    StartCoroutine(WaitAtPosition());
+                }
+
+
+            }
+        }
+
+
+    }
+
+    void Guarding()
+    {
+        Vector3 nextPoint = pathFollowing.Peek();
+        Vector3 distanceVector = nextPoint - transform.position;
+        Vector3 yZeroDistanceVector = returnYZeroVector3(distanceVector);
+
+        //if the player is sprinting and nearby, the enemy will catch it
+        if (player.GetComponent<PlayerController>().noiseLevel == 2 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 4)
+        {
+            myState = AIState.Chasing;
+            target = player.transform;
+        }
+        //if the player is walking and VERY nearby, the enemy will catch it
+        if (player.GetComponent<PlayerController>().noiseLevel == 1 && Vector3.Distance(returnYZeroVector3(transform.position), returnYZeroVector3(player.transform.position)) < 1)
+        {
+            myState = AIState.Chasing;
+            target = player.transform;
+        }
+
+        if (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), nextPoint) < .1f)
+        {
+            nextPath();
+        }
+        else
+        {
+            // Check to see if you can see the next point
+            RaycastHit nextPointHit;
+            bool safe = !Physics.Raycast(returnYZeroVector3(transform.position), returnYZeroVector3(distanceVector), out nextPointHit, distanceVector.magnitude, UnwalkableMask);
+            if (safe)
+            {
+                StopCoroutine("FollowPath");
+                pathRequested = false; // Gotta make sure this is reset
+                Velocity += (yZeroDistanceVector.normalized * guardSpeed);
+            }
+            else
+            {
+                pathRequested = true;
+                pathIndex = 0;
+                PathRequestManager.RequestPath(transform.position, nextPoint, OnPathFound);
+            }
+
+        }
+    }
+
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
         if (pathSuccessful)
@@ -195,6 +247,14 @@ public class EnemyController : MonoBehaviour
             Velocity += (toVec * chaseSpeed); // Move!
             yield return null;
         }
+    }
+
+    IEnumerator WaitAtPosition()
+    {
+        yield return new WaitForSeconds(4);
+        waitingRequested = false;
+        myState = AIState.Guarding;
+        SetClosestPath();
     }
 
     void nextPath() //set the next path point to the first one, while moving the first to the end

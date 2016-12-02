@@ -89,8 +89,8 @@ public class WallCameras : MonoBehaviour
                     if(alertRect.Contains(new Vector2(enemies[i].transform.position.x, enemies[i].transform.position.z)))
                     {
                         //enemies go to where the player was last seen
-                        enemies[i].GetComponent<EnemyController>().guarding = false;
-                        enemies[i].GetComponent<EnemyController>().target = player.transform.position;
+                        enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Guarding;
+                        enemies[i].GetComponent<EnemyController>().target = player.transform;
                     }
                 }
             }

@@ -47,8 +47,8 @@ public class GameManager : MonoBehaviour
             //only chase the player if the enemy can see them
             else
             {
-                enemies[i].GetComponent<EnemyController>().guarding = false; //sets this enemy to chase the player
-                enemies[i].GetComponent<EnemyController>().target = player.transform.position; //sets the enemies target to the player's position
+                enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Chasing; //sets this enemy to chase the player
+                enemies[i].GetComponent<EnemyController>().target = player.transform; //sets the enemies target to the player's position
             }
         }
         GameObject[] cameras = GameObject.FindGameObjectsWithTag("WallCamera"); //gets all tagged wall cameras
@@ -60,11 +60,11 @@ public class GameManager : MonoBehaviour
                 for (int i2 = 0; i2 < enemies.Length; i2++) //loops through all the enemies
                 {
                     //only change enemies that don't presently know where the player is
-                    if (enemies[i2].GetComponent<EnemyController>().guarding)
+                    if (enemies[i2].GetComponent<EnemyController>().myState == EnemyController.AIState.Guarding)
                     {
                         //enemies go to where the player was last seen
-                        enemies[i2].GetComponent<EnemyController>().guarding = false;
-                        enemies[i2].GetComponent<EnemyController>().target = player.transform.position;
+                        enemies[i2].GetComponent<EnemyController>().myState = EnemyController.AIState.Chasing;
+                        enemies[i2].GetComponent<EnemyController>().target = player.transform;
                     }
                 }
             }
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < enemies.Length; i++) //loops through all the enemies
         {
             enemies[i].transform.position = new Vector3(enemies[i].GetComponent<EnemyController>().startingPos.x, enemies[i].transform.position.y, enemies[i].GetComponent<EnemyController>().startingPos.y); //sets this enemy to it's starting position
-            enemies[i].GetComponent<EnemyController>().guarding = true; //sets this enemy to follow it's path
+            enemies[i].GetComponent<EnemyController>().myState = EnemyController.AIState.Guarding; //sets this enemy to follow it's path
             enemies[i].GetComponent<EnemyController>().resetPath(); //makes sure this enemies path is followed in the right order
         }
         GameObject player = GameObject.FindGameObjectWithTag("GamePlayer"); //gets the tagged player
