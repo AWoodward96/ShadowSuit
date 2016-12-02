@@ -135,6 +135,7 @@ public class WallCameras : MonoBehaviour
 
         //scales the image to be the size it should be
         gameObject.transform.GetChild(0).transform.localScale = new Vector3(200 / numb, 200 / numb, 0);
+        //gameObject.transform.GetChild(0).transform.eulerAngles = new Vector3(0, 8)
 
         float angleDetail = .2f;
 

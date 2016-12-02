@@ -66,8 +66,8 @@ public class ElevatorScript : MonoBehaviour {
             }
 
         }
-        else
-            Debug.Log("A door isn't initialized!");
+        //else
+            //Debug.Log("A door isn't initialized!");
 	    
 	}
 

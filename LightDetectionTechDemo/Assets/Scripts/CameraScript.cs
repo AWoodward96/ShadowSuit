@@ -71,7 +71,7 @@ public class CameraScript : MonoBehaviour {
         }
         else
         {
-            Debug.Log("We could not properly locate the world position for the cursor!");
+            //Debug.Log("We could not properly locate the world position for the cursor!");
         }
 
 

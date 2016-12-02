@@ -264,32 +264,35 @@ public class EnemyController : MonoBehaviour
 
     IEnumerator FollowPath()
     {
-        Vector3 currentWaypoint = path[0];
-        while (true)
+        if (path.Length >= 1)
         {
-            Vector3 waypointYNom = currentWaypoint; // We do this because we'll complain if the value of waypointYNom isn't set
-            waypointYNom.y = transform.position.y; // Make the current y position equal to your current y position. We're syncing up the y values here
-            // Otherwise the character will start to move towards 0 on the Y axis, and look like it's jumping up and down. We don't want that
-
-            float dist = Vector3.Distance(transform.position, waypointYNom);
-
-            if (dist < .3f)
+            Vector3 currentWaypoint = path[0];
+            while (true)
             {
-                pathIndex++;
-                if (pathIndex >= path.Length)
+                Vector3 waypointYNom = currentWaypoint; // We do this because we'll complain if the value of waypointYNom isn't set
+                waypointYNom.y = transform.position.y; // Make the current y position equal to your current y position. We're syncing up the y values here
+                                                       // Otherwise the character will start to move towards 0 on the Y axis, and look like it's jumping up and down. We don't want that
+
+                float dist = Vector3.Distance(transform.position, waypointYNom);
+
+                if (dist < .3f)
                 {
-                    pathRequested = false;
-                    yield break;// exit out of the coroutine
+                    pathIndex++;
+                    if (pathIndex >= path.Length)
+                    {
+                        pathRequested = false;
+                        yield break;// exit out of the coroutine
+                    }
+                    currentWaypoint = path[pathIndex];// get the next waypoint
                 }
-                currentWaypoint = path[pathIndex];// get the next waypoint
+
+                Vector3 toVec = waypointYNom - transform.position; // Get the vector we're moving towards
+
+                toVec.Normalize(); // Noramlize it so there's no shinanigans
+                                   //Vector2 yNormalized = new Vector2(toVec.x, toVec.z);
+                Velocity += (toVec * chaseSpeed); // Move!
+                yield return null;
             }
-
-            Vector3 toVec = waypointYNom - transform.position; // Get the vector we're moving towards
-
-            toVec.Normalize(); // Noramlize it so there's no shinanigans
-                               //Vector2 yNormalized = new Vector2(toVec.x, toVec.z);
-            Velocity += (toVec * chaseSpeed); // Move!
-            yield return null;
         }
     }
 
