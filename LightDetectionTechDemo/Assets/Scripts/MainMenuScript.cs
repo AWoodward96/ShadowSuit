@@ -54,7 +54,7 @@ public class MainMenuScript : MonoBehaviour {
         if(next)
         {
             
-            CameraTinter.color = Color.Lerp(CameraTinter.color, Color.black, Time.deltaTime);
+            CameraTinter.color = Color.Lerp(CameraTinter.color, Color.black, Time.deltaTime * 1.2f);
         }
 	}
 
@@ -67,7 +67,7 @@ public class MainMenuScript : MonoBehaviour {
 
     IEnumerator ToNextScene()
     {
-        yield return new WaitForSeconds(7);
+        yield return new WaitForSeconds(4);
         SceneManager.LoadScene(SceneToBootUp);
     }
 }

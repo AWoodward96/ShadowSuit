@@ -61,8 +61,8 @@ public class ElevatorScript : MonoBehaviour {
                 ElevatorLight.color = Color.blue;
                 DoorLeft.transform.localPosition = Vector3.Lerp(DoorLeft.transform.localPosition, ClosedPositionLeft, 3f * Time.deltaTime);
                 DoorRight.transform.localPosition = Vector3.Lerp(DoorRight.transform.localPosition, ClosedPositionRight, 3f * Time.deltaTime);
-                SceneManager.LoadScene(nextScene);
-                
+                StartCoroutine(NextScene());
+
             }
 
         }
@@ -70,6 +70,12 @@ public class ElevatorScript : MonoBehaviour {
             Debug.Log("A door isn't initialized!");
 	    
 	}
+
+    IEnumerator NextScene()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene(nextScene);
+    }
 
     void OnTriggerEnter(Collider Col)
     {
