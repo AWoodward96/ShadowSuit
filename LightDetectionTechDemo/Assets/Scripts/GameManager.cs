@@ -7,10 +7,13 @@ public class GameManager : MonoBehaviour
     //static GameManager instance;
 
     static Vector3 playerStartingPosition;
+    bool canvasTextUsed;
+    GameObject firstInteract;
 
 	// Use this for initialization
 	void Start ()
     {
+        canvasTextUsed = false;
         //instance = this;
 
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy"); //gets all tagged enemies
@@ -26,6 +29,14 @@ public class GameManager : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+        if (canvasTextUsed)
+        {
+            if (firstInteract.GetComponent<Console>().Dist > firstInteract.GetComponent<Console>().interactRange)
+            {
+                firstInteract.GetComponent<Console>().interact.gameObject.SetActive(false);
+                canvasTextUsed = false;
+            }
+        }
     }
 
     public void PlayerInLight() //run this function if the player is lit up
@@ -123,5 +134,22 @@ public class GameManager : MonoBehaviour
         }
 
         pc.initializeLights(Lights);
+    }
+
+    public bool CanvasTextUsed
+    {
+        get
+        {
+            return canvasTextUsed;
+        }
+    }
+    public void UseText()
+    {
+        canvasTextUsed = true;
+    }
+
+    public void SetFirstInteract(GameObject first)
+    {
+        firstInteract = first;
     }
 }

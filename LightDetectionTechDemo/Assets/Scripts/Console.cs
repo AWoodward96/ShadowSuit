@@ -2,21 +2,23 @@
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Console : MonoBehaviour {
 
     //list of associated lights
     public List<GameObject> lights = new List<GameObject>();
-
-    float dist;
+    
     public float interactRange;
     GameObject player;
 
-    public bool currentState;
-    public bool defaultState;
+    public bool currentState = false; 
+    public bool defaultState = false;
 
     public bool canBeChecked;
     int countdownTimer;
+
+    public Text interact;
 
     public enum Purpose
     {
@@ -33,8 +35,6 @@ public class Console : MonoBehaviour {
         canBeChecked = false;
         //find player
         player = GameObject.FindGameObjectWithTag("GamePlayer");
-        currentState = false;
-        defaultState = false;
         if (action == Purpose.lights)
         {
             gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.green;
@@ -46,6 +46,11 @@ public class Console : MonoBehaviour {
         if (action == Purpose.exit)
         {
             gameObject.transform.GetChild(0).GetComponent<Renderer>().material.color = Color.blue;
+        }
+        if(currentState)
+        {
+            gameObject.transform.GetChild(1).transform.GetChild(0).gameObject.SetActive(!currentState);
+            gameObject.transform.GetChild(2).transform.GetChild(0).gameObject.SetActive(currentState);
         }
     }
 
@@ -68,12 +73,19 @@ public class Console : MonoBehaviour {
             canBeChecked = false;
         }
 
-        //dist between player and console
-        dist = Vector2.Distance(new Vector2(player.transform.position.x, player.transform.position.z), new Vector2(this.transform.position.x, this.transform.position.z));
-        
+        if (Dist <= interactRange)
+        {
+            GameManager manager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
+            if (!manager.CanvasTextUsed)
+            {
+                manager.UseText();
+                manager.SetFirstInteract(gameObject);
+                interact.gameObject.SetActive(true);
+            }
+        }
 
         //if in range and key pressed
-        if (dist <= interactRange && Input.GetKeyDown(KeyCode.E))
+        if (Dist <= interactRange && Input.GetKeyDown(KeyCode.E))
         {
             RaycastHit hit;
             //Physics.Raycast(this.transform.position, (player.transform.position - this.transform.position), out hit);
@@ -146,5 +158,13 @@ public class Console : MonoBehaviour {
         currentState = !currentState;
         gameObject.transform.GetChild(1).transform.GetChild(0).gameObject.SetActive(!currentState);
         gameObject.transform.GetChild(2).transform.GetChild(0).gameObject.SetActive(currentState);
+    }
+
+    public float Dist
+    {
+        get
+        {
+            return Vector2.Distance(new Vector2(player.transform.position.x, player.transform.position.z), new Vector2(this.transform.position.x, this.transform.position.z));
+        }
     }
 }
