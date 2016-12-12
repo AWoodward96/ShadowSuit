@@ -19,6 +19,7 @@ public class Console : MonoBehaviour {
     int countdownTimer;
 
     public Text interact;
+    private bool notifyBack = false;
 
     public enum Purpose
     {
@@ -32,6 +33,8 @@ public class Console : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
+        interact = GameObject.FindGameObjectWithTag("Press E").transform.GetChild(0).GetComponent<Text>(); //gets all tagged enemies
+
         canBeChecked = false;
         //find player
         player = GameObject.FindGameObjectWithTag("GamePlayer");
@@ -82,6 +85,27 @@ public class Console : MonoBehaviour {
                 manager.SetFirstInteract(gameObject);
                 interact.gameObject.SetActive(true);
             }
+            gameObject.transform.GetChild(3).gameObject.SetActive(true);
+            if(!notifyBack)
+            {
+                gameObject.transform.GetChild(3).transform.localScale = new Vector3(gameObject.transform.GetChild(3).transform.localScale.x + .01f, gameObject.transform.GetChild(3).transform.localScale.y + .01f, gameObject.transform.GetChild(3).transform.localScale.z);
+                if(gameObject.transform.GetChild(3).transform.localScale.x > 1)
+                {
+                    notifyBack = true;
+                }
+            }
+            else
+            {
+                gameObject.transform.GetChild(3).transform.localScale = new Vector3(gameObject.transform.GetChild(3).transform.localScale.x - .01f, gameObject.transform.GetChild(3).transform.localScale.y - .01f, gameObject.transform.GetChild(3).transform.localScale.z);
+                if (gameObject.transform.GetChild(3).transform.localScale.x < .5)
+                {
+                    notifyBack = false;
+                }
+            }
+        }
+        else
+        {
+            gameObject.transform.GetChild(3).gameObject.SetActive(false);
         }
 
         //if in range and key pressed

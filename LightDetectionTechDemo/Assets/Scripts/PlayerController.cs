@@ -41,6 +41,8 @@ public class PlayerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        transform.GetChild(0).gameObject.SetActive(false);
+
         lightIndicator.SetActive(false);
         inLight = false;
         noiseLevel = 0;

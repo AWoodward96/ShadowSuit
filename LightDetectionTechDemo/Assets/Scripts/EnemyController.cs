@@ -99,7 +99,7 @@ public class EnemyController : MonoBehaviour
         RaycastHit hit;
         //the distance between the player and enemy, for raycasting
         Vector3 dist = player.transform.position - transform.position;
-
+        
         // Check to see if you can see the player right now
         bool safe = !Physics.Raycast(transform.position, dist, out hit, dist.magnitude, UnwalkableMask);
         if (safe)
@@ -108,6 +108,8 @@ public class EnemyController : MonoBehaviour
             // Then move towards the player
             LastSeenPosition = target.transform.position; // Update the last seen position
             
+            target.transform.GetChild(0).gameObject.SetActive(true);
+
             // Now move towards that position
             // First thing is to stop the a Star algorythm
             StopCoroutine("FollowPath");
