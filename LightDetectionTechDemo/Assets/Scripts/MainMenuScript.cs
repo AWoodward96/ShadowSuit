@@ -46,6 +46,10 @@ public class MainMenuScript : MonoBehaviour {
 
         if(Input.anyKeyDown)
         {
+            if (SceneToBootUp == "EXIT")
+            {
+                Application.Quit();
+            }
             next = true;
             BlinkingText.transform.parent.gameObject.SetActive(false);
             StartCoroutine(ToNextScene());
